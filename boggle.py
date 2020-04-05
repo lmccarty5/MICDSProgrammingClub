@@ -35,8 +35,8 @@ class Application(tk.Frame):
         root.mainloop()
         
     def JustDoIt():
-        reset()
-        start()
+        Application.reset()
+        Application.start()
 
 
 
@@ -142,6 +142,7 @@ class Application(tk.Frame):
         """Ask user if they want to close program."""
         if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
             root.destroy()
+            print("Timer End: __________________________________________________")
 
 
 
@@ -153,6 +154,7 @@ class tim(Thread):
     
     def run(self):
         Application.fireitup()
+
 
 
 
@@ -182,7 +184,7 @@ class goodStuff(Thread):
                     ti.start()
                     goodStuff.initial = False;
                 else:
-                   print("The timer is alread open. Please use the controls in the timer window to reset and start the timer.")
+                   print("The timer has already been opened. Please use the opened timer window to control the timer or restart the program to open another timer.")
             except:
                 print("To open another timer, please restart the program")
 
