@@ -1,3 +1,9 @@
+# A Digital Version of Boggle
+# Author: LmcCarty
+
+
+
+
 #import statements
 import random
 import time
@@ -27,6 +33,10 @@ class Application(tk.Frame):
         root.title("TIMER")
         Application(root).pack(side="top", fill="both", expand=True)
         root.mainloop()
+        
+    def JustDoIt():
+        reset()
+        start()
 
 
 
@@ -121,6 +131,7 @@ class Application(tk.Frame):
 
     def reset(self):
         """Resets the timer to 0."""
+        print("Game Reset: __________________________________________________")
         self.power_button.configure(text="Start", command=lambda: self.start())
         self.master.bind("<Return>", lambda x: self.start())
         self.running = False
@@ -129,7 +140,6 @@ class Application(tk.Frame):
 
     def quit(self):
         """Ask user if they want to close program."""
-        print("Program End: _____________________________________________________")
         if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
             root.destroy()
 
@@ -143,6 +153,9 @@ class tim(Thread):
     
     def run(self):
         Application.fireitup()
+
+
+
 
 
 #class for main game on a second thread
@@ -342,6 +355,7 @@ class goodStuff(Thread):
         def pop():
             if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
                 window.destroy()
+                print("Program End: _____________________________________________________")
 
 
             
