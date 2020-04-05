@@ -4,31 +4,153 @@ import time
 from tkinter import *
 import winsound
 from threading import *
+import tkinter as tk
+import tkinter.messagebox
+
+
+
+class timVar:
+    countdown = 5
+
+
+
+
+class Application(tk.Frame):
+    """"Simple timer application using tkinter."""
+
+
+
+    def fireitup():
+        """Main loop which creates program."""
+        global root
+        root = tk.Tk()
+        root.title("TIMER")
+        Application(root).pack(side="top", fill="both", expand=True)
+        root.mainloop()
+
+
+
+
+    def __init__(self, master, *args, **kwargs):
+        tk.Frame.__init__(self, master, *args, **kwargs)
+        self.master = master
+        self.running = False
+        self.time = 180
+        self.hours = 0
+        self.mins = 3
+        self.secs = 0
+        self.build_interface()
+
+    def build_interface(self):
+        """The interface function."""
+        self.time_entry = tk.Entry(self)
+
+        self.clock = tk.Label(self, text="00:03:00", font=("Courier", 20), width=10)
+        self.clock.grid(row=1, column=1, stick="S")
+
+        self.time_label = tk.Label(self, text="hour min sec", font=("Courier", 10), width=15)
+        self.time_label.grid(row=2, column=1, sticky="N")
+
+        self.power_button = tk.Button(self, text="Start", command=lambda: self.start())
+        self.power_button.grid(row=3, column=0, sticky="NE")
+
+        self.reset_button = tk.Button(self, text="Reset", command=lambda: self.reset())
+        self.reset_button.grid(row=3, column=1, sticky="NW")
+
+        self.quit_button = tk.Button(self, text="Quit", command=lambda: self.quit())
+        self.quit_button.grid(row=3, column=3, sticky="NE")
+
+        self.master.bind("<Return>", lambda x: self.start())
+        self.time_entry.bind("<Key>", lambda v: self.update())
+
+    def calculate(self):
+        """Calculates the time"""
+        self.hours = self.time // 3600
+        self.mins = (self.time // 60) % 60
+        self.secs = self.time % 60
+        return "{:02d}:{:02d}:{:02d}".format(self.hours, self.mins, self.secs)
+
+    def update(self):
+        """Checks if valid time entered and updates the timer"""
+        self.time = int(self.time_entry.get())
+        try:
+            self.clock.configure(text=self.calculate())
+        except:
+            self.clock.configure(text="00:00:00")
+
+    def timer(self):
+        """Calculates the time to be displayed"""
+        frequency = 5000 # Set Frequency To 2500 Hertz
+        duration = 500  # Set Duration To 1000 ms == 1 second
+        if self.running:
+            if self.time <= 0:
+                print("Game End: _____________________________________________________")
+                print("You are out of time. Now count the number of words that you recognized. To play again, please restart the timer.")
+                self.clock.configure(text="Time's up!")
+                winsound.Beep(frequency, duration)
+                time.sleep(0.5)
+                self.clock.configure(text="Time's up!")
+                winsound.Beep(frequency, duration)
+                time.sleep(0.5)
+                self.clock.configure(text="Time's up!")
+                winsound.Beep(frequency, duration)
+
+            else:
+                self.clock.configure(text=self.calculate())
+                self.time -= 1
+                self.after(1000, self.timer)
+
+    def start(self):
+        """Begins the timer"""
+        try:
+            print("Game Start: __________________________________________________")
+            self.time = int(self.time_entry.get())
+            self.time_entry.delete(0, 'end')
+        except:
+            self.time = self.time
+        self.power_button.configure(text="Stop", command=lambda: self.stop())
+        self.master.bind("<Return>", lambda x: self.stop())
+        self.running = True
+        self.timer()
+
+    def stop(self):
+        """Stops the timer"""
+        self.power_button.configure(text="Start", command=lambda: self.start())
+        self.master.bind("<Return>", lambda x: self.start())
+        self.running = False
+
+    def reset(self):
+        """Resets the timer to 0."""
+        self.power_button.configure(text="Start", command=lambda: self.start())
+        self.master.bind("<Return>", lambda x: self.start())
+        self.running = False
+        self.time = 180
+        self.clock["text"] = "00:03:00"
+
+    def quit(self):
+        """Ask user if they want to close program."""
+        print("Program End: _____________________________________________________")
+        if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
+            root.destroy()
+
+
 
 
 
 #class for timer on one thread
 class tim(Thread):
+
+    
     def run(self):
-        t=0
-        while t<100:
-            time.sleep(1)
-            t=t+1
-        #beep when countdown is finished
-        frequency = 5000 # Set Frequency To 2500 Hertz
-        duration = 500  # Set Duration To 1000 ms == 1 second
-        winsound.Beep(frequency, duration)
-        time.sleep(0.5)
-        winsound.Beep(frequency, duration)
-        time.sleep(0.5)
-        winsound.Beep(frequency, duration)
-        print("You are out of time. Now count the number of words that you recognized. To play again, please restart the program.")
-
-
+        Application.fireitup()
 
 
 #class for main game on a second thread
 class goodStuff(Thread):
+
+    initial = True
+
+    timerPrinter = str(timVar.countdown)
     def run(self):
         window = Tk()
         window.title("Boggle")
@@ -43,9 +165,14 @@ class goodStuff(Thread):
         #associated with timer. Allows the other thread to start when the start timer button is hit
         def tip():
             try:
-                ti.start()
-            except: #catches error if the thread is started twice
-                print("To Play Another Game Or Reset the Timer, Please Rerun the Program")
+                if(goodStuff.initial==True):
+                    ti.start()
+                    goodStuff.initial = False;
+                else:
+                   print("The timer is alread open. Please use the controls in the timer window to reset and start the timer.")
+            except:
+                print("To open another timer, please restart the program")
+
             
 
         #this is building the dice:
@@ -205,10 +332,32 @@ class goodStuff(Thread):
 
 
         #start timer button
-        Button(window, text="START TIMER", width = 20, command= tip).grid(row=14,column=0,sticky=N)
+        Button(window, text="OPEN TIMER", width = 20, command= tip).grid(row=14,column=0,sticky=N)
+
+     
+        
+
+
+
+        def pop():
+            if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
+                window.destroy()
+
+
+            
+
+       #kill window button button
+        Button(window, text="KILL PROGRAM", width = 25, command= pop).grid(row=17,column=0,sticky=N)
+
+        
+
+        
+
 
         #start the window
         window.mainloop()
+
+        
 
 
 #create two separate objects for each of the classes
@@ -218,6 +367,7 @@ ti = tim()
 
 #start main thread
 bigboy.start()
+
 
 
 
